@@ -1,0 +1,38 @@
+{
+  "name": "govflow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GovFlow — accountability and obligation management platform",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "npm run dev --workspace @govflow/api",
+    "dev:web": "npm run dev --workspace @govflow/web",
+    "build": "npm run build --workspace @govflow/api && npm run build --workspace @govflow/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint apps packages supabase/seed scripts --max-warnings 0",
+    "test": "npm run test --workspace @govflow/api",
+    "db:migrate": "node scripts/apply-migrations.mjs",
+    "db:seed": "tsx supabase/seed/seed.ts",
+    "scan": "tsx scripts/run-scan.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.36.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.0.0",
+    "pg": "^8.13.1",
+    "tsx": "^4.19.2",
+    "typescript-eslint": "^8.44.0"
+  }
+}

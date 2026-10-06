@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "paths": {
+      "@govflow/types": ["../../packages/types/src/index.ts"],
+      "@govflow/validation": ["../../packages/validation/src/index.ts"]
+    }
+  },
+  "include": ["src", "test"]
+}
