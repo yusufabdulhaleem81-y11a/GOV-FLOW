@@ -21,6 +21,7 @@ import { ReportsPage } from '@/pages/reports'
 import { AuditPage } from '@/pages/audit'
 import { SettingsPage } from '@/pages/settings'
 import { NotFoundPage } from '@/pages/not-found'
+import { LandingPage } from '@/pages/Landing'
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { status } = useAuth()
@@ -43,6 +44,19 @@ function RequireOrganization({ children }: { children: JSX.Element }) {
     return <NoOrganization membershipsCount={memberships.length} />
   }
   return children
+}
+
+function HomeRoute() {
+  const { status } = useAuth()
+  if (status === 'loading') {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner />
+      </div>
+    )
+  }
+  if (status === 'signed-in') return <Navigate to="/dashboard" replace />
+  return <LandingPage />
 }
 
 function NoOrganization({ membershipsCount }: { membershipsCount: number }) {
@@ -124,7 +138,7 @@ export function AppRoutes() {
         <Route path="/settings" element={<RequireOrganization><SettingsPage /></RequireOrganization>} />
       </Route>
 
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<HomeRoute />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
