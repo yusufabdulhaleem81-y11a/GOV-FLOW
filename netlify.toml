@@ -1,10 +1,11 @@
 [build]
-  command = "npm ci && npm run build --workspace apps/web"
+  command = "npm ci --include=dev && npm run build --workspace apps/web"
   publish = "apps/web/dist"
 
 [build.environment]
   NODE_VERSION = "20"
 
+# SPA fallback: React Router owns every URL, so all paths serve index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
