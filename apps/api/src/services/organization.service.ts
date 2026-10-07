@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import type { Organization, Profile, UserRole } from '@govflow/types'
 import type { DB, DbRow } from '../db/types.js'
 import { mutation, one, rows } from '../db/types.js'
@@ -45,32 +46,34 @@ export async function createOrganization(
   input: { name: string; description?: string },
   userId: string,
 ): Promise<Organization> {
-  const org = (
-    await mutation<DbRow>(
-      db
-        .from('organizations')
-        .insert({
-          name: input.name,
-          slug: `${slugify(input.name)}-${randomCode(4).toLowerCase()}`,
-          description: input.description ?? null,
-          invite_code: randomCode(),
-        })
-        .select(),
-    )
-  )[0]
-  if (!org) throw new Error('Failed to create organization')
+  const organizationId = randomUUID()
+  await mutation<DbRow>(
+    db
+      .from('organizations')
+      .insert({
+        id: organizationId,
+        name: input.name,
+        slug: `${slugify(input.name)}-${randomCode(4).toLowerCase()}`,
+        description: input.description ?? null,
+        invite_code: randomCode(),
+      }),
+  )
 
   const { error: memberError } = await db
     .from('organization_members')
-    .insert({ organization_id: org.id as string, user_id: userId, role: 'admin' })
+    .insert({ organization_id: organizationId, user_id: userId, role: 'admin' })
   if (memberError) throw new Error(`Failed to add owner as member: ${memberError.message}`)
 
+  const org = await one<DbRow>(
+    db.from('organizations').select('*').eq('id', organizationId).limit(1),
+  )
+
   await recordAudit(db, {
-    organizationId: org.id as string,
+    organizationId,
     actorId: userId,
     action: 'organization_created',
     entityType: 'organization',
-    entityId: org.id as string,
+    entityId: organizationId,
     summary: `Created organization "${org.name as string}"`,
   })
   return org as unknown as Organization
