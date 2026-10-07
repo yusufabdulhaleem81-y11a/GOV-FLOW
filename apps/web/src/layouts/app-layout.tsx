@@ -224,7 +224,7 @@ function NotificationsBell() {
         )}
       </Button>
       {open && (
-        <div className="absolute right-0 z-40 mt-2 w-80 overflow-hidden rounded-lg border bg-card shadow-popover animate-slide-in">
+        <div className="absolute right-0 z-40 mt-2 w-80 max-w-[calc(100vw-5rem)] overflow-hidden rounded-lg border bg-card shadow-popover animate-slide-in">
           <div className="flex items-center justify-between border-b px-3 py-2">
             <p className="text-xs font-semibold">Notifications</p>
             {unread > 0 && (

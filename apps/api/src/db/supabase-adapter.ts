@@ -21,8 +21,9 @@ export function createSupabaseDB(client: SupabaseClient): DB {
         })
       return wrap<T>(b)
     },
-    insert<T extends DbRow>(row: DbRow | DbRow[]) {
-      return wrap<T>(client.from(table).insert(row as never).select())
+    insert<T extends DbRow>(row: DbRow | DbRow[], options?: { returning?: boolean }) {
+      const query = client.from(table).insert(row as never)
+      return wrap<T>(options?.returning === false ? query : query.select())
     },
     update<T extends DbRow>(patch: DbRow) {
       return wrap<T>(client.from(table).update(patch as never).select())

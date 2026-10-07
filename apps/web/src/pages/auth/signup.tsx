@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/providers/auth-provider'
 import { AuthShell } from './login'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,13 @@ import { signUpSchema } from '@govflow/validation'
 export function SignupPage() {
   const { signUp, status } = useAuth()
   const navigate = useNavigate()
-  const [form, setForm] = useState({ full_name: '', email: '', password: '', invite_code: '' })
+  const [searchParams] = useSearchParams()
+  const [form, setForm] = useState({
+    full_name: '',
+    email: '',
+    password: '',
+    invite_code: searchParams.get('invite_code')?.toUpperCase() ?? '',
+  })
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)

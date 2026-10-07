@@ -56,7 +56,7 @@ export async function createOrganization(
         slug: `${slugify(input.name)}-${randomCode(4).toLowerCase()}`,
         description: input.description ?? null,
         invite_code: randomCode(),
-      }),
+      }, { returning: false }),
   )
 
   const { error: memberError } = await db

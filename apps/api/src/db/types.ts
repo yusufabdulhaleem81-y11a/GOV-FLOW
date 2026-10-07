@@ -52,7 +52,10 @@ export interface TableClient {
     columns?: string,
     options?: { count?: 'exact' | 'head' },
   ): AwaitableQuery<T>
-  insert<T extends DbRow = DbRow>(row: DbRow | DbRow[]): AwaitableQuery<T>
+  insert<T extends DbRow = DbRow>(
+    row: DbRow | DbRow[],
+    options?: { returning?: boolean },
+  ): AwaitableQuery<T>
   update<T extends DbRow = DbRow>(patch: DbRow): AwaitableQuery<T>
   delete(): AwaitableQuery<never>
 }

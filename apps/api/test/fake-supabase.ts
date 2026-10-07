@@ -219,7 +219,8 @@ export class FakeDB implements DB {
         if (options?.count === 'exact') q.countExact = true
         return q
       },
-      insert: (payload: DbRow | DbRow[]) => buildWrite({ kind: 'insert', payload }),
+      insert: (payload: DbRow | DbRow[], _options?: { returning?: boolean }) =>
+        buildWrite({ kind: 'insert', payload }),
       update: (payload: DbRow) => buildWrite({ kind: 'update', payload }),
       delete: () => buildWrite({ kind: 'delete' }),
     }
