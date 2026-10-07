@@ -45,7 +45,7 @@ See [docs/architecture.md](docs/architecture.md) for details and [docs/api.md](d
 
 ## Prerequisites
 
-- **Node.js 20+** and npm 10+
+- **Node.js 22+** and npm 10+
 - A **Supabase project** (free tier works): https://supabase.com
 
 ---
