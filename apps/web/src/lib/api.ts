@@ -65,7 +65,7 @@ export async function api<T>(
   if (token) headers.Authorization = `Bearer ${token}`
   if (organizationId) headers['X-Organization-Id'] = organizationId
 
-  const response = await fetch(url.pathname + url.search, {
+  const response = await fetch(url.toString(), {
     method: options.method ?? 'GET',
     headers,
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
@@ -79,7 +79,7 @@ export async function downloadCsv(path: string, query: Record<string, string>): 
   const url = new URL(`${baseUrl}${path}`, window.location.origin)
   for (const [key, value] of Object.entries(query)) url.searchParams.set(key, value)
 
-  const response = await fetch(url.pathname + url.search, {
+  const response = await fetch(url.toString(), {
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(organizationId ? { 'X-Organization-Id': organizationId } : {}),
