@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import { requireOrg, requireRole } from '../app-context.js'
+import { requireAuth, requireOrg, requireRole } from '../app-context.js'
 import {
   createOrganization,
   getOrganization,
@@ -25,12 +25,12 @@ export async function organizationRoutes(app: FastifyInstance): Promise<void> {
   })
 
   app.post('/', async (request) => {
-    const user = await requireOrg(request)
+    const user = await requireAuth(request)
     const body = validateBody(createOrganizationSchema, request.body)
     const organization = await createOrganization(
       app.deps.dbForToken(request.token),
       body,
-      user.userId,
+      user.id,
     )
     return { organization }
   })

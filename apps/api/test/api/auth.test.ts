@@ -66,6 +66,27 @@ describe('organization membership & isolation', () => {
     expect(res.json().organization.id).toBe(harness.orgA)
   })
 
+  it('allows an authenticated user to create their first organization without an organization header', async () => {
+    const user = harness.users.memberB
+    const res = await harness.app.inject({
+      method: 'POST',
+      url: '/api/v1/organizations',
+      headers: { authorization: `Bearer ${user.token}` },
+      payload: { name: 'New Workspace' },
+    })
+
+    expect(res.statusCode).toBe(200)
+    const organization = res.json().organization
+    expect(organization.name).toBe('New Workspace')
+    expect(harness.db.all('organization_members')).toContainEqual(
+      expect.objectContaining({
+        organization_id: organization.id,
+        user_id: user.id,
+        role: 'admin',
+      }),
+    )
+  })
+
   it('rejects an unknown invite code', async () => {
     const res = await authed(harness, harness.users.memberB, harness.orgB).post('/api/v1/join', { code: 'NOPE' })
     expect(res.statusCode).toBe(404)
