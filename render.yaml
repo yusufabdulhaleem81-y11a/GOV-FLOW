@@ -18,4 +18,4 @@ services:
       - key: NODE_ENV
         value: production
       - key: NODE_VERSION
-        value: "21"
+        value: "22"
