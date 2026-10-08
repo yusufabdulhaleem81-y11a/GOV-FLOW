@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { authed, createHarness, type TestHarness } from '../harness'
+import { regenerateInviteCode } from '../../src/services/organization.service'
 
 let harness: TestHarness
 
@@ -116,5 +117,29 @@ describe('organization membership & isolation', () => {
       role: 'member',
     })
     expect(res.statusCode).toBe(409)
+  })
+
+  it('regenerates an organization invite code for admins and rejects non-admins', async () => {
+    const adminRes = await authed(harness, harness.users.adminA, harness.orgA)
+      .post(`/api/v1/organizations/${harness.orgA}/invite-code`)
+    expect(adminRes.statusCode).toBe(200)
+    expect(adminRes.json().invite_code).not.toBe('INVITE-A')
+    expect(harness.db.all('organizations')).toContainEqual(
+      expect.objectContaining({ id: harness.orgA, invite_code: adminRes.json().invite_code }),
+    )
+
+    const managerRes = await authed(harness, harness.users.managerA, harness.orgA)
+      .post(`/api/v1/organizations/${harness.orgA}/invite-code`)
+    expect(managerRes.statusCode).toBe(403)
+    expect(managerRes.json().error.code).toBe('FORBIDDEN')
+  })
+
+  it('returns not found when invite regeneration updates no organization row', async () => {
+    await expect(
+      regenerateInviteCode(harness.db, {
+        organizationId: 'a0000000-0000-4000-8000-000000000099',
+        actorId: harness.users.adminA.id,
+      }),
+    ).rejects.toMatchObject({ statusCode: 404, code: 'NOT_FOUND' })
   })
 })

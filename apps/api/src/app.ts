@@ -24,7 +24,7 @@ import { searchRoutes } from './modules/search.routes.js'
 /** Builds the fully-wired Fastify application. Pure factory — easy to test with fastify.inject. */
 export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   const app = Fastify({
-    logger: false,
+    logger: { level: 'error' },
     trustProxy: true,
     bodyLimit: 1024 * 1024,
   })
@@ -71,7 +71,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
       })
       return
     }
-    request.log.error(error)
+    request.log.error({ err: error }, 'Unhandled API error')
     void reply.status(500).send({
       error: {
         code: 'INTERNAL_ERROR',

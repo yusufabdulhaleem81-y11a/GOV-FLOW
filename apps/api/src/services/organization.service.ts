@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import type { Organization, Profile, UserRole } from '@govflow/types'
 import type { DB, DbRow } from '../db/types.js'
 import { mutation, one, rows } from '../db/types.js'
-import { badRequest, conflict, notFound } from '../lib/errors.js'
+import { badRequest, conflict, forbidden, notFound } from '../lib/errors.js'
 import { recordAudit } from './audit.service.js'
 
 export type OrgRow = Organization
@@ -227,11 +227,14 @@ export async function regenerateInviteCode(
   ctx: { organizationId: string; actorId: string },
 ): Promise<string> {
   const code = randomCode()
-  const { error } = await db
+  const { data, error } = await db
     .from('organizations')
     .update({ invite_code: code })
     .eq('id', ctx.organizationId)
+    .select()
+  if (error?.code === '42501') throw forbidden()
   if (error) throw new Error(`Database error: ${error.message}`)
+  if (!data?.length) throw notFound('Organization')
 
   await recordAudit(db, {
     organizationId: ctx.organizationId,
