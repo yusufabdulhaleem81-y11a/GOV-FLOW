@@ -86,13 +86,36 @@ function OrgSwitcher() {
     return (
       <div className="rounded-md border border-sidebar-border bg-sidebar-accent p-3 text-xs text-sidebar-foreground">
         No organization yet.
-        <button
-          type="button"
-          className="mt-2 block w-full rounded bg-primary px-2 py-1.5 text-xs font-medium text-white"
-          onClick={() => void createOrganization('My Organization')}
+        <form
+          className="mt-2 space-y-2"
+          onSubmit={(e) => {
+            e.preventDefault()
+            const organizationName = name.trim()
+            if (!organizationName || busy) return
+            setBusy(true)
+            setError(null)
+            void createOrganization(organizationName)
+              .then(() => setName(''))
+              .catch((err: Error) => setError(err.message))
+              .finally(() => setBusy(false))
+          }}
         >
-          Create organization
-        </button>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Organization name"
+            aria-label="Organization name"
+            className="h-9 w-full rounded border border-sidebar-border bg-sidebar px-2 text-xs text-white placeholder:text-sidebar-foreground/60 focus-ring"
+          />
+          {error && <p className="break-words text-xs text-red-300" role="alert">{error}</p>}
+          <button
+            type="submit"
+            disabled={busy || !name.trim()}
+            className="block h-9 w-full rounded bg-primary px-2 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+          >
+            {busy ? 'Creating…' : 'Create organization'}
+          </button>
+        </form>
       </div>
     )
   }

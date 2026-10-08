@@ -61,7 +61,7 @@ export async function createOrganization(
 
   const { error: memberError } = await db
     .from('organization_members')
-    .insert({ organization_id: organizationId, user_id: userId, role: 'admin' })
+    .insert({ organization_id: organizationId, user_id: userId, role: 'admin' }, { returning: false })
   if (memberError) throw new Error(`Failed to add owner as member: ${memberError.message}`)
 
   const org = await one<DbRow>(
@@ -264,7 +264,7 @@ export async function joinByCode(
 
   const { error } = await db
     .from('organization_members')
-    .insert({ organization_id: organizationId, user_id: userId, role: 'member' })
+    .insert({ organization_id: organizationId, user_id: userId, role: 'member' }, { returning: false })
   if (error) throw new Error(`Database error: ${error.message}`)
 
   await recordAudit(db, {
