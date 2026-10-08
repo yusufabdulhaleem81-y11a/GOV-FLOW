@@ -71,6 +71,33 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
       })
       return
     }
+    const statusCode = error.statusCode
+    if (typeof statusCode === 'number' && Number.isInteger(statusCode) && statusCode >= 400 && statusCode <= 599) {
+      if (statusCode >= 500) request.log.error({ err: error }, 'Fastify server error')
+      const emptyJsonBody = error.code === 'FST_ERR_CTP_EMPTY_JSON_BODY'
+      const code = statusCode === 400
+        ? 'BAD_REQUEST'
+        : statusCode === 401
+          ? 'UNAUTHORIZED'
+          : statusCode === 403
+            ? 'FORBIDDEN'
+            : statusCode === 404
+              ? 'NOT_FOUND'
+              : statusCode >= 500
+                ? 'INTERNAL_ERROR'
+                : 'REQUEST_ERROR'
+      void reply.status(statusCode).send({
+        error: {
+          code,
+          message: emptyJsonBody
+            ? 'Request body is empty but Content-Type is application/json'
+            : statusCode >= 500 && deps.env.NODE_ENV === 'production'
+              ? 'An unexpected error occurred'
+              : error.message,
+        },
+      })
+      return
+    }
     request.log.error({ err: error }, 'Unhandled API error')
     void reply.status(500).send({
       error: {

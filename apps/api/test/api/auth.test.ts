@@ -121,7 +121,7 @@ describe('organization membership & isolation', () => {
 
   it('regenerates an organization invite code for admins and rejects non-admins', async () => {
     const adminRes = await authed(harness, harness.users.adminA, harness.orgA)
-      .post(`/api/v1/organizations/${harness.orgA}/invite-code`)
+      .post(`/api/v1/organizations/${harness.orgA}/invite-code`, {})
     expect(adminRes.statusCode).toBe(200)
     expect(adminRes.json().invite_code).not.toBe('INVITE-A')
     expect(harness.db.all('organizations')).toContainEqual(
@@ -132,6 +132,27 @@ describe('organization membership & isolation', () => {
       .post(`/api/v1/organizations/${harness.orgA}/invite-code`)
     expect(managerRes.statusCode).toBe(403)
     expect(managerRes.json().error.code).toBe('FORBIDDEN')
+  })
+
+  it('returns a bad-request envelope for an empty JSON body on invite regeneration', async () => {
+    const response = await harness.app.inject({
+      method: 'POST',
+      url: `/api/v1/organizations/${harness.orgA}/invite-code`,
+      headers: {
+        authorization: ['Bearer ', harness.users.adminA.token].join(''),
+        'x-organization-id': harness.orgA,
+        'content-type': 'application/json',
+      },
+      payload: '',
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json()).toMatchObject({
+      error: {
+        code: 'BAD_REQUEST',
+        message: 'Request body is empty but Content-Type is application/json',
+      },
+    })
   })
 
   it('returns not found when invite regeneration updates no organization row', async () => {

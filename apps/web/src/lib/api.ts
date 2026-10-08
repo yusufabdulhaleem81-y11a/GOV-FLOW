@@ -59,9 +59,8 @@ export async function api<T>(
     }
   }
 
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  }
+  const headers: Record<string, string> = {}
+  if (options.body !== undefined) headers['Content-Type'] = 'application/json'
   if (token) headers.Authorization = `Bearer ${token}`
   if (organizationId) headers['X-Organization-Id'] = organizationId
 
