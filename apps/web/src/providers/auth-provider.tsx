@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Session, SupabaseClient } from '@supabase/supabase-js'
 import type { Organization, UserRole } from '@govflow/types'
 import { hasPermission, type Permission } from '@govflow/types'
@@ -37,6 +37,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 const ORG_STORAGE_KEY = 'govflow.organization-id'
+const PENDING_INVITE_KEY = 'govflow.pending-invite-code'
 
 export function AuthProvider({ env, children }: { env: WebEnv; children: ReactNode }) {
   const supabase = getSupabase(env)
@@ -45,6 +46,25 @@ export function AuthProvider({ env, children }: { env: WebEnv; children: ReactNo
   const [profile, setProfile] = useState<Profile | null>(null)
   const [memberships, setMemberships] = useState<{ organization: Organization; role: UserRole }[]>([])
   const [organizationId, setOrganizationId] = useState<string | null>(() => localStorage.getItem(ORG_STORAGE_KEY))
+  const pendingInviteRequest = useRef<Promise<Organization> | null>(null)
+
+  const acceptPendingInvite = useCallback(async () => {
+    const inviteCode = localStorage.getItem(PENDING_INVITE_KEY)
+    if (!inviteCode) return null
+    if (!pendingInviteRequest.current) {
+      pendingInviteRequest.current = endpoints.joinOrganization(inviteCode)
+        .then(({ organization }) => {
+          if (localStorage.getItem(PENDING_INVITE_KEY) === inviteCode) {
+            localStorage.removeItem(PENDING_INVITE_KEY)
+          }
+          return organization
+        })
+        .finally(() => {
+          pendingInviteRequest.current = null
+        })
+    }
+    return pendingInviteRequest.current
+  }, [])
 
   // Wire the API client to the Supabase session.
   useEffect(() => {
@@ -69,12 +89,15 @@ export function AuthProvider({ env, children }: { env: WebEnv; children: ReactNo
       return
     }
     try {
+      const invitedOrganization = await acceptPendingInvite()
       const me = await endpoints.getMe()
       setProfile(me.user)
       setMemberships(me.memberships)
       setAuthStatus('signed-in')
       const stored = localStorage.getItem(ORG_STORAGE_KEY)
-      const valid = me.memberships.find((m) => m.organization.id === stored) ?? me.memberships[0]
+      const valid = me.memberships.find((m) => m.organization.id === invitedOrganization?.id)
+        ?? me.memberships.find((m) => m.organization.id === stored)
+        ?? me.memberships[0]
       const activeId = valid?.organization.id ?? null
       setOrganizationId(activeId)
       setActiveOrganization(activeId)
@@ -83,7 +106,7 @@ export function AuthProvider({ env, children }: { env: WebEnv; children: ReactNo
       // API unreachable or profile not ready — treat as signed in but empty.
       setAuthStatus('signed-in')
     }
-  }, [supabase])
+  }, [supabase, acceptPendingInvite])
 
   useEffect(() => {
     void loadAccount()
@@ -111,9 +134,17 @@ export function AuthProvider({ env, children }: { env: WebEnv; children: ReactNo
     async (email: string, password: string) => {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) throw new Error(error.message)
+      try {
+        const organization = await acceptPendingInvite()
+        if (organization) setCurrentOrganization(organization.id)
+      } catch (error) {
+        await loadAccount()
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        throw new Error(`Signed in, but the invitation could not be accepted: ${message}`)
+      }
       await loadAccount()
     },
-    [supabase, loadAccount],
+    [supabase, loadAccount, setCurrentOrganization, acceptPendingInvite],
   )
 
   const signUp = useCallback(
@@ -125,14 +156,19 @@ export function AuthProvider({ env, children }: { env: WebEnv; children: ReactNo
       })
       if (error) throw new Error(error.message)
       if (!data.session) {
+        if (input.invite_code) {
+          localStorage.setItem(PENDING_INVITE_KEY, input.invite_code.trim().toUpperCase())
+        }
         throw new Error('ACCOUNT_CREATED_CONFIRM_EMAIL')
       }
       if (input.invite_code) {
-        await endpoints.joinOrganization(input.invite_code).catch(() => undefined)
+        localStorage.setItem(PENDING_INVITE_KEY, input.invite_code.trim().toUpperCase())
+        const organization = await acceptPendingInvite()
+        if (organization) setCurrentOrganization(organization.id)
       }
       await loadAccount()
     },
-    [supabase, loadAccount],
+    [supabase, loadAccount, setCurrentOrganization, acceptPendingInvite],
   )
 
   const signOut = useCallback(async () => {

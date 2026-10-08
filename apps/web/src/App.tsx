@@ -5,6 +5,7 @@ import { AuthProvider } from '@/providers/auth-provider'
 import { loadWebEnv } from '@/lib/env'
 import { SetupRequiredPage } from '@/pages/setup-required'
 import { AppRoutes } from '@/routes'
+import { ThemeProvider } from '@/providers/theme-provider'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,16 +19,21 @@ const queryClient = new QueryClient({
 
 export default function App() {
   const env = loadWebEnv()
-  if (!env) return <SetupRequiredPage />
   return (
-    <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <AuthProvider env={env}>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </AuthProvider>
-      </ToastProvider>
-    </QueryClientProvider>
+    <ThemeProvider>
+      {!env ? (
+        <SetupRequiredPage />
+      ) : (
+        <QueryClientProvider client={queryClient}>
+          <ToastProvider>
+            <AuthProvider env={env}>
+              <BrowserRouter>
+                <AppRoutes />
+              </BrowserRouter>
+            </AuthProvider>
+          </ToastProvider>
+        </QueryClientProvider>
+      )}
+    </ThemeProvider>
   )
 }

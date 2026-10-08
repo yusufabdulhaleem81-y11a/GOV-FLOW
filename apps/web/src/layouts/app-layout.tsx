@@ -23,6 +23,7 @@ import { useNotifications } from '@/hooks/queries'
 import { Button } from '@/components/ui/button'
 import { Dropdown, DropdownItem, DropdownLabel, DropdownSeparator } from '@/components/ui/dropdown'
 import { Avatar } from '@/components/ui/misc'
+import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { formatDateTime, ROLE_LABELS } from '@govflow/types'
 import { markAllNotificationsRead, markNotificationRead } from '@/services/endpoints'
 import { cn } from '@/lib/utils'
@@ -392,6 +393,7 @@ export function AppLayout() {
             <Menu className="h-5 w-5" />
           </button>
           <div className="flex-1" />
+          <ThemeToggle />
           <NotificationsBell />
           <UserMenu />
         </header>

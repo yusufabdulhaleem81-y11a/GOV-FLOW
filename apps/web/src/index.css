@@ -29,6 +29,32 @@
     --sidebar-border: 217 33% 20%;
   }
 
+  :root.dark {
+    color-scheme: dark;
+    --background: 222 47% 8%;
+    --foreground: 210 40% 96%;
+    --card: 222 39% 12%;
+    --card-foreground: 210 40% 96%;
+    --primary: 243 75% 70%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 70%;
+    --accent: 243 35% 20%;
+    --accent-foreground: 243 100% 88%;
+    --destructive: 0 62% 42%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217 25% 24%;
+    --input: 217 25% 28%;
+    --ring: 243 75% 70%;
+    --sidebar: 222 47% 6%;
+    --sidebar-foreground: 213 27% 84%;
+    --sidebar-accent: 217 33% 14%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 217 33% 17%;
+  }
+
   * {
     @apply border-border;
   }
@@ -51,6 +77,61 @@
   .focus-ring {
     @apply outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+html,
+body,
+#root {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.dark .bg-white,
+.dark [class~="bg-white/90"] {
+  background-color: hsl(var(--card));
+}
+
+.dark .bg-slate-50,
+.dark [class~="bg-slate-50/80"],
+.dark [class~="bg-slate-50/70"] {
+  background-color: hsl(var(--muted));
+}
+
+.dark .bg-slate-100,
+.dark .bg-slate-200 {
+  background-color: hsl(var(--secondary));
+}
+
+.dark .border-slate-200,
+.dark .border-slate-300 {
+  border-color: hsl(var(--border));
+}
+
+.dark .text-slate-950,
+.dark .text-slate-900,
+.dark .text-slate-800 {
+  color: hsl(var(--foreground));
+}
+
+.dark .text-slate-700,
+.dark .text-slate-600,
+.dark .text-slate-500,
+.dark .text-slate-400 {
+  color: hsl(var(--muted-foreground));
+}
+
+.dark .from-white {
+  --tw-gradient-from: hsl(var(--background)) var(--tw-gradient-from-position);
+  --tw-gradient-to: hsl(var(--background) / 0) var(--tw-gradient-to-position);
+}
+
+.dark .to-slate-50 {
+  --tw-gradient-to: hsl(var(--muted)) var(--tw-gradient-to-position);
 }
 
 /* Subtle scrollbars */
@@ -154,6 +235,14 @@
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html,
+    body,
+    #root {
+      transition: background-color 160ms ease-out, color 160ms ease-out;
+    }
   }
 
   .reveal [data-reveal-item],

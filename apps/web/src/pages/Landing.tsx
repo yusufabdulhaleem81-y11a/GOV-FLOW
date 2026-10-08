@@ -3,24 +3,29 @@ import { Link } from 'react-router-dom'
 import {
   ArrowLeftRight,
   ArrowRight,
+  Building2,
   CalendarDays,
   Check,
   CheckCircle2,
+  CircleHelp,
   ClipboardCheck,
   ClipboardPlus,
   FileCheck2,
   History,
   Landmark,
+  ListChecks,
   ShieldCheck,
   TriangleAlert,
   UserRound,
   Users,
 } from 'lucide-react'
+import type { MouseEvent } from 'react'
 import type { ObligationStatus } from '@govflow/types'
 import { STATUS_LABELS } from '@govflow/types'
 import { StatusBadge } from '@/components/shared/badges'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ThemeToggle } from '@/components/shared/theme-toggle'
 
 const obligationStages: ObligationStatus[] = [
   'draft',
@@ -50,6 +55,85 @@ const roles = [
   { title: 'Manager', description: 'Monitors overdue work, escalations, and team accountability.', icon: Users },
   { title: 'Admin', description: 'Sets up the organization, people, and operating structure.', icon: Landmark },
 ]
+
+const whyGovFlow = [
+  {
+    title: 'Evidence is the contract',
+    description: 'An obligation is complete when its evidence is accepted—not when someone ticks a checkbox. Review decisions stay attached to the work.',
+    icon: FileCheck2,
+  },
+  {
+    title: 'History is immutable',
+    description: 'Every meaningful action is recorded in an append-only audit trail, preserving who did what and when.',
+    icon: History,
+  },
+  {
+    title: 'Nothing slips',
+    description: 'Reminders start before deadlines. Overdue work is marked and can be escalated so managers can act.',
+    icon: TriangleAlert,
+  },
+]
+
+const audiences = [
+  {
+    title: 'Companies',
+    description: 'Keep operational decisions and control work accountable.',
+    examples: ['Audit observations', 'Management decisions', 'Compliance packs'],
+    icon: Building2,
+  },
+  {
+    title: 'Government bodies',
+    description: 'Track formal obligations across ministries and agencies.',
+    examples: ['Ministry directives', 'Agency commitments', 'Formal escalations'],
+    icon: Landmark,
+  },
+  {
+    title: 'NGOs',
+    description: 'Connect donor-funded activities to verifiable outcomes.',
+    examples: ['Donor activities', 'Reporting deadlines', 'Evidence-based closure'],
+    icon: ListChecks,
+  },
+]
+
+const faqs = [
+  {
+    question: 'How is GovFlow different from Trello or Asana?',
+    answer: 'Generic tools track checkboxes; GovFlow tracks the full accountability chain: responsible user, deadline, required evidence, reviewer judgment, escalation, and permanent history.',
+  },
+  {
+    question: 'Can an obligation be closed without evidence?',
+    answer: 'No. Closure requires every required evidence item to be accepted by a reviewer. There is no override.',
+  },
+  {
+    question: 'What happens when a deadline is missed?',
+    answer: 'The system marks it overdue, reminds the responsible user, and escalates to management after the obligation’s threshold. Managers can also escalate manually.',
+  },
+  {
+    question: 'Who can see our organization’s data?',
+    answer: 'Only your organization’s members. Data is isolated per organization at both the API and database layers.',
+  },
+  {
+    question: 'How do people join?',
+    answer: 'An admin shares the organization invite code; staff sign up and join with it. Roles include Responsible User, Reviewer, Manager, Viewer, and Admin.',
+  },
+  {
+    question: 'Does GovFlow use AI?',
+    answer: 'Not in the core workflow. GovFlow is deliberately focused on accountability, with no chat or AI summaries in the decision path.',
+  },
+]
+
+function handleAnchorClick(event: MouseEvent<HTMLAnchorElement>) {
+  const href = event.currentTarget.getAttribute('href')
+  if (!href?.startsWith('#')) return
+  const target = document.getElementById(href.slice(1))
+  if (!target) return
+  event.preventDefault()
+  target.scrollIntoView({
+    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    block: 'start',
+  })
+  window.history.replaceState(null, '', href)
+}
 
 function useReveal<T extends HTMLElement>() {
   const ref = useRef<T>(null)
@@ -217,6 +301,7 @@ function HeroObligationCard() {
 export function LandingPage() {
   const problemReveal = useReveal<HTMLElement>()
   const loopReveal = useReveal<HTMLElement>()
+  const whyReveal = useReveal<HTMLElement>()
   const rolesReveal = useReveal<HTMLElement>()
   const closingReveal = useReveal<HTMLElement>()
 
@@ -228,7 +313,10 @@ export function LandingPage() {
             <span className="flex h-8 w-8 items-center justify-center rounded-md bg-sidebar text-sm font-bold text-white">G</span>
             <span className="text-base font-semibold tracking-tight">GovFlow</span>
           </Link>
-          <Link to="/login" className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-card transition-colors hover:bg-primary/90 focus-ring">Sign in</Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link to="/login" className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-card transition-colors hover:bg-primary/90 focus-ring">Sign in</Link>
+          </div>
         </div>
       </nav>
 
@@ -303,7 +391,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section ref={loopReveal.ref} className={`reveal border-b bg-slate-50 ${loopReveal.visible ? 'is-visible' : ''}`}>
+      <section id="loop" ref={loopReveal.ref} className={`reveal border-b bg-slate-50 ${loopReveal.visible ? 'is-visible' : ''}`}>
         <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
           <RevealItem>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">The core loop</p>
@@ -335,6 +423,54 @@ export function LandingPage() {
         </div>
       </section>
 
+      <section id="why" ref={whyReveal.ref} className={`reveal border-b bg-white ${whyReveal.visible ? 'is-visible' : ''}`}>
+        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
+          <RevealItem>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Why GovFlow</p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">Accountability built on verifiable work.</h2>
+          </RevealItem>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {whyGovFlow.map(({ title, description, icon: Icon }, index) => (
+              <RevealItem key={title} index={index + 1}>
+                <Card className="h-full shadow-none">
+                  <CardContent className="pt-5">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/5 text-primary"><Icon className="h-4 w-4" /></span>
+                    <h3 className="mt-4 text-sm font-semibold">{title}</h3>
+                    <p className="mt-2 text-xs leading-5 text-muted-foreground">{description}</p>
+                  </CardContent>
+                </Card>
+              </RevealItem>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="who" className="border-b bg-slate-50">
+        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Who it’s for</p>
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">Built for organizations where accountability is not optional.</h2>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {audiences.map(({ title, description, examples, icon: Icon }) => (
+              <Card key={title} className="h-full bg-white shadow-none">
+                <CardContent className="pt-5">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/5 text-primary"><Icon className="h-4 w-4" /></span>
+                  <h3 className="mt-4 text-sm font-semibold">{title}</h3>
+                  <p className="mt-1.5 text-xs leading-5 text-muted-foreground">{description}</p>
+                  <ul className="mt-4 space-y-2 border-t pt-4">
+                    {examples.map((example) => (
+                      <li key={example} className="flex items-center gap-2 text-xs text-slate-700">
+                        <Check className="h-3.5 w-3.5 shrink-0 text-emerald-700" />
+                        {example}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section ref={rolesReveal.ref} className={`reveal border-b bg-white ${rolesReveal.visible ? 'is-visible' : ''}`}>
         <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
           <RevealItem>
@@ -357,6 +493,29 @@ export function LandingPage() {
         </div>
       </section>
 
+      <section id="faq" className="border-b bg-slate-50">
+        <div className="mx-auto max-w-4xl px-5 py-16 sm:px-8 sm:py-20">
+          <div className="flex items-center gap-3">
+            <CircleHelp className="h-5 w-5 text-primary" />
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">FAQ</p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Straight answers about accountability.</h2>
+            </div>
+          </div>
+          <div className="mt-8 divide-y rounded-lg border bg-white px-5">
+            {faqs.map(({ question, answer }) => (
+              <details key={question} className="group py-4">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-semibold text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                  {question}
+                  <span className="text-lg font-normal text-primary transition-transform group-open:rotate-45" aria-hidden="true">+</span>
+                </summary>
+                <p className="mt-3 max-w-3xl text-xs leading-6 text-muted-foreground">{answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section ref={closingReveal.ref} className={`reveal bg-sidebar text-white ${closingReveal.visible ? 'is-visible' : ''}`}>
         <RevealItem className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-5 py-12 sm:px-8 md:flex-row md:items-center">
           <div>
@@ -367,10 +526,56 @@ export function LandingPage() {
         </RevealItem>
       </section>
 
-      <footer className="border-t bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <span className="font-semibold text-slate-700">GovFlow</span>
-          <span>Accountability, supported by evidence and a durable record.</span>
+      <footer id="contact" className="border-t border-slate-700 bg-sidebar text-slate-300">
+        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-14">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <Link to="/" className="inline-flex items-center gap-2.5 rounded-sm text-white focus-ring" aria-label="GovFlow home">
+                <span className="flex h-8 w-8 items-center justify-center rounded-md bg-white/10 text-sm font-bold">G</span>
+                <span className="text-base font-semibold tracking-tight">GovFlow</span>
+              </Link>
+              <p className="mt-4 max-w-xs text-xs leading-6 text-slate-300">Accountability and obligation management — who owes what → to whom → by when → evidence → review → escalation → closure.</p>
+            </div>
+
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-white">Product</h2>
+              <ul className="mt-4 space-y-3 text-xs">
+                <li><a href="#why" onClick={handleAnchorClick} className="transition-colors hover:text-white">Why GovFlow</a></li>
+                <li><a href="#loop" onClick={handleAnchorClick} className="transition-colors hover:text-white">How it works</a></li>
+                <li><a href="#who" onClick={handleAnchorClick} className="transition-colors hover:text-white">Who it’s for</a></li>
+                <li><a href="#faq" onClick={handleAnchorClick} className="transition-colors hover:text-white">FAQ</a></li>
+                <li><Link to="/login" className="transition-colors hover:text-white">Sign in</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-white">Contact us</h2>
+              <ul className="mt-4 space-y-3 text-xs">
+                <li><a href="tel:08143751471" className="transition-colors hover:text-white">0814 375 1471</a></li>
+                <li><a href="mailto:hello@govflow.app" className="transition-colors hover:text-white">hello@govflow.app</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-white">Follow us</h2>
+              <div className="mt-4 flex items-center gap-3">
+                <a href="https://x.com/govflow" aria-label="GovFlow on X" target="_blank" rel="noopener noreferrer" className="flex h-9 w-9 items-center justify-center rounded-md border border-slate-600 text-slate-300 transition-colors hover:border-slate-400 hover:text-white">
+                  <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true"><path d="M18.9 2H22l-6.78 7.75L23.2 22h-6.25l-4.9-7.4L5.58 22H2.45l7.25-8.29L1.8 2h6.4l4.43 6.75L18.9 2Zm-1.1 18h1.73L7.27 3.89H5.41L17.8 20Z" /></svg>
+                </a>
+                <a href="https://instagram.com/govflow" aria-label="GovFlow on Instagram" target="_blank" rel="noopener noreferrer" className="flex h-9 w-9 items-center justify-center rounded-md border border-slate-600 text-slate-300 transition-colors hover:border-slate-400 hover:text-white">
+                  <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm0 2A3.8 3.8 0 0 0 4 7.8v8.4A3.8 3.8 0 0 0 7.8 20h8.4a3.8 3.8 0 0 0 3.8-3.8V7.8A3.8 3.8 0 0 0 16.2 4H7.8ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm5.25-3.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z" /></svg>
+                </a>
+                <a href="https://linkedin.com/company/govflow" aria-label="GovFlow on LinkedIn" target="_blank" rel="noopener noreferrer" className="flex h-9 w-9 items-center justify-center rounded-md border border-slate-600 text-slate-300 transition-colors hover:border-slate-400 hover:text-white">
+                  <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true"><path d="M20.45 2H3.55C2.69 2 2 2.68 2 3.52v16.96c0 .84.69 1.52 1.55 1.52h16.9c.86 0 1.55-.68 1.55-1.52V3.52c0-.84-.69-1.52-1.55-1.52ZM7.93 18.45H4.98V9h2.95v9.45ZM6.45 7.71a1.71 1.71 0 1 1 0-3.42 1.71 1.71 0 0 1 0 3.42Zm12 10.74H15.5v-4.6c0-1.1-.02-2.52-1.54-2.52-1.54 0-1.78 1.2-1.78 2.44v4.68H9.23V9h2.83v1.29h.04c.39-.74 1.36-1.52 2.8-1.52 3 0 3.55 1.97 3.55 4.53v5.15Z" /></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 flex flex-col gap-2 border-t border-slate-700 pt-5 text-[11px] text-slate-300 sm:flex-row sm:items-center sm:justify-between">
+            <span>© {new Date().getFullYear()} GovFlow. All rights reserved.</span>
+            <span>Built for organizations that take accountability seriously.</span>
+          </div>
         </div>
       </footer>
     </main>
