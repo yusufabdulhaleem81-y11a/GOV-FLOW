@@ -552,7 +552,7 @@ export function LandingPage() {
               <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-white">Contact us</h2>
               <ul className="mt-4 space-y-3 text-xs">
                 <li><a href="tel:08143751471" className="transition-colors hover:text-white">0814 375 1471</a></li>
-                <li><a href="mailto:hello@govflow.app" className="transition-colors hover:text-white">hello@govflow.app</a></li>
+                <li><a href="mailto:hellogovflow@gmail.com" className="transition-colors hover:text-white">hellogovflow@gmail.com</a></li>
               </ul>
             </div>
 
